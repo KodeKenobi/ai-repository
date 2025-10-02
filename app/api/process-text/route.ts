@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import {
-  ContentType,
-  ContentSource,
-  ProcessingStatus,
-} from "../../../prisma/generated/client";
+import { ContentType, ContentSource, ProcessingStatus } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
