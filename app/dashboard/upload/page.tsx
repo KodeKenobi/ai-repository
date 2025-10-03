@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import UploadPage from '@/components/upload/upload-page'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardUploadPage() {
   const session = await getServerSession(authOptions)
   

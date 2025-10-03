@@ -3,7 +3,7 @@ const path = require("path");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
-  output: process.env.NEXT_OUTPUT_MODE,
+  output: process.env.NEXT_OUTPUT_MODE || 'standalone',
   experimental: {
     outputFileTracingRoot: path.join(__dirname, "../"),
   },
@@ -24,8 +24,8 @@ const nextConfig = {
   trailingSlash: false,
   generateEtags: false,
   poweredByHeader: false,
-  // Disable static optimization for pages that use context
-  generateStaticParams: false,
+  // Disable static optimization
+  staticPageGenerationTimeout: 1000,
 };
 
 module.exports = nextConfig;
