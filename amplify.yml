@@ -8,6 +8,7 @@ frontend:
         - npx prisma generate
     build:
       commands:
+        - export NEXT_OUTPUT_MODE=standalone
         - pnpm run build
   artifacts:
     baseDirectory: .next

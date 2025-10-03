@@ -6,6 +6,7 @@ const nextConfig = {
   output: process.env.NEXT_OUTPUT_MODE || "standalone",
   experimental: {
     outputFileTracingRoot: path.join(__dirname, "../"),
+    esmExternals: false,
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -26,9 +27,8 @@ const nextConfig = {
   staticPageGenerationTimeout: 1000,
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
-  // Disable static optimization for error pages
+  // Completely disable static generation
   generateStaticParams: false,
-  // Force dynamic rendering for error pages
   dynamicParams: true,
 };
 
