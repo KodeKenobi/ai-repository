@@ -1,8 +1,3 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-
-export const dynamic = 'force-dynamic'
-
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
@@ -14,9 +9,9 @@ export default function NotFound() {
         <p className="text-gray-600 mb-8">
           The page you're looking for doesn't exist.
         </p>
-        <Link href="/">
-          <Button>Go Home</Button>
-        </Link>
+        <a href="/" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          Go Home
+        </a>
       </div>
     </div>
   );

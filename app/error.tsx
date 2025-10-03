@@ -1,10 +1,3 @@
-"use client";
-
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-
-export const dynamic = 'force-dynamic'
-
 export default function Error({
   error,
   reset,
@@ -12,10 +5,6 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
       <div className="text-center">
@@ -27,17 +16,18 @@ export default function Error({
           An unexpected error occurred. Please try again.
         </p>
         <div className="space-x-4">
-          <Button onClick={reset}>Try again</Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.location.href = "/"
-              }
-            }}
+          <button 
+            onClick={reset}
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Try again
+          </button>
+          <a 
+            href="/"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
           >
             Go Home
-          </Button>
+          </a>
         </div>
       </div>
     </div>
