@@ -91,6 +91,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const requestBody = await request.json();
+    console.log("Company creation request body:", JSON.stringify(requestBody, null, 2));
+
     const {
       name,
       description,
@@ -171,9 +174,10 @@ export async function POST(request: NextRequest) {
       growthStrategy,
       investmentThesis,
       dueDiligenceNotes,
-    } = await request.json();
+    } = requestBody;
 
     if (!name) {
+      console.log("Missing company name in request");
       return NextResponse.json(
         { error: "Company name is required" },
         { status: 400 }
@@ -186,6 +190,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingCompany) {
+      console.log(`Company "${name}" already exists`);
       return NextResponse.json(
         { error: "Company already exists" },
         { status: 400 }
