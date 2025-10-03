@@ -24,9 +24,12 @@ const nextConfig = {
   generateEtags: false,
   poweredByHeader: false,
   staticPageGenerationTimeout: 1000,
-  // Skip static generation for error pages
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
+  // Disable static optimization for error pages
+  generateStaticParams: false,
+  // Force dynamic rendering for error pages
+  dynamicParams: true,
 };
 
 module.exports = nextConfig;
