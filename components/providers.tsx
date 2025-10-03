@@ -16,15 +16,21 @@ export default function Providers({ children }: ProvidersProps) {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
-    return <div>{children}</div>
-  }
-
+  // Always render SessionProvider, but conditionally render ThemeProvider
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        {children}
-      </ThemeProvider>
+      {mounted ? (
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="light" 
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      ) : (
+        <div suppressHydrationWarning>{children}</div>
+      )}
     </SessionProvider>
   )
 }

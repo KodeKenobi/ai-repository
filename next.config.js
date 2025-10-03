@@ -20,6 +20,12 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   reactStrictMode: false,
+  // Add configuration to handle SSR issues
+  trailingSlash: false,
+  generateEtags: false,
+  poweredByHeader: false,
+  // Disable static optimization for pages that use context
+  generateStaticParams: false,
 };
 
 module.exports = nextConfig;
