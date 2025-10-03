@@ -3,6 +3,46 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+// Function to check if a company has sufficient data to be considered "fully populated"
+function isCompanyFullyPopulated(company: any): boolean {
+  const requiredFields = [
+    'description', 'industry', 'website', 'country', 'size', 'sector',
+    'foundedYear', 'headquarters', 'revenue', 'employeeCount', 'legalStatus',
+    'ceo', 'linkedin', 'phone', 'email', 'businessModel', 'targetMarket'
+  ];
+  
+  const optionalButImportantFields = [
+    'marketCap', 'stockSymbol', 'founders', 'boardMembers', 'twitter',
+    'facebook', 'instagram', 'youtube', 'address', 'glassdoorRating',
+    'googleRating', 'products', 'geographicPresence', 'keyPartners',
+    'competitors', 'marketShare', 'competitiveAdvantage', 'growthStage'
+  ];
+  
+  // Count how many required fields are populated
+  const requiredPopulated = requiredFields.filter(field => {
+    const value = company[field];
+    return value !== null && value !== undefined && value !== '' && 
+           !(Array.isArray(value) && value.length === 0) &&
+           !(typeof value === 'object' && value !== null && Object.keys(value).length === 0);
+  }).length;
+  
+  // Count how many optional fields are populated
+  const optionalPopulated = optionalButImportantFields.filter(field => {
+    const value = company[field];
+    return value !== null && value !== undefined && value !== '' && 
+           !(Array.isArray(value) && value.length === 0) &&
+           !(typeof value === 'object' && value !== null && Object.keys(value).length === 0);
+  }).length;
+  
+  // Company is considered fully populated if:
+  // - At least 80% of required fields are filled (13 out of 16)
+  // - At least 50% of optional fields are filled (10 out of 20)
+  const requiredThreshold = Math.ceil(requiredFields.length * 0.8);
+  const optionalThreshold = Math.ceil(optionalButImportantFields.length * 0.5);
+  
+  return requiredPopulated >= requiredThreshold && optionalPopulated >= optionalThreshold;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -191,10 +231,110 @@ export async function POST(request: NextRequest) {
 
     if (existingCompany) {
       console.log(`Company "${name}" already exists`);
-      return NextResponse.json(
-        { error: `A company named "${name}" already exists. Please choose a different name or search for the existing company.` },
-        { status: 400 }
-      );
+      
+      // Check if the existing company is fully populated
+      const isFullyPopulated = isCompanyFullyPopulated(existingCompany);
+      
+      if (isFullyPopulated) {
+        return NextResponse.json(
+          { error: `A company named "${name}" already exists with complete information. Please choose a different name or search for the existing company.` },
+          { status: 400 }
+        );
+      } else {
+        // Update the existing company with new data
+        console.log(`Updating incomplete company "${name}" with new data`);
+        const updatedCompany = await prisma.company.update({
+          where: { name },
+          data: {
+            description: description || existingCompany.description,
+            industry: industry || existingCompany.industry,
+            website: website || existingCompany.website,
+            country: country || existingCompany.country,
+            size: size || existingCompany.size,
+            type: type || existingCompany.type,
+            tradingName: tradingName || existingCompany.tradingName,
+            sector: sector || existingCompany.sector,
+            foundedYear: foundedYear || existingCompany.foundedYear,
+            headquarters: headquarters || existingCompany.headquarters,
+            revenue: revenue || existingCompany.revenue,
+            marketCap: marketCap || existingCompany.marketCap,
+            employeeCount: employeeCount || existingCompany.employeeCount,
+            legalStatus: legalStatus || existingCompany.legalStatus,
+            stockSymbol: stockSymbol || existingCompany.stockSymbol,
+            ceo: ceo || existingCompany.ceo,
+            keyExecutives: keyExecutives || existingCompany.keyExecutives,
+            founders: founders || existingCompany.founders,
+            boardMembers: boardMembers || existingCompany.boardMembers,
+            linkedin: linkedin || existingCompany.linkedin,
+            twitter: twitter || existingCompany.twitter,
+            facebook: facebook || existingCompany.facebook,
+            instagram: instagram || existingCompany.instagram,
+            youtube: youtube || existingCompany.youtube,
+            otherSocial: otherSocial || existingCompany.otherSocial,
+            phone: phone || existingCompany.phone,
+            email: email || existingCompany.email,
+            address: address || existingCompany.address,
+            supportEmail: supportEmail || existingCompany.supportEmail,
+            salesEmail: salesEmail || existingCompany.salesEmail,
+            pressContact: pressContact || existingCompany.pressContact,
+            glassdoorRating: glassdoorRating || existingCompany.glassdoorRating,
+            googleRating: googleRating || existingCompany.googleRating,
+            trustpilotScore: trustpilotScore || existingCompany.trustpilotScore,
+            bbbRating: bbbRating || existingCompany.bbbRating,
+            yelpRating: yelpRating || existingCompany.yelpRating,
+            industryReviews: industryReviews || existingCompany.industryReviews,
+            businessModel: businessModel || existingCompany.businessModel,
+            products: products || existingCompany.products,
+            targetMarket: targetMarket || existingCompany.targetMarket,
+            geographicPresence: geographicPresence || existingCompany.geographicPresence,
+            languages: languages || existingCompany.languages,
+            keyPartners: keyPartners || existingCompany.keyPartners,
+            majorClients: majorClients || existingCompany.majorClients,
+            suppliers: suppliers || existingCompany.suppliers,
+            competitors: competitors || existingCompany.competitors,
+            acquisitions: acquisitions || existingCompany.acquisitions,
+            subsidiaries: subsidiaries || existingCompany.subsidiaries,
+            marketShare: marketShare || existingCompany.marketShare,
+            competitiveAdvantage: competitiveAdvantage || existingCompany.competitiveAdvantage,
+            industryRanking: industryRanking || existingCompany.industryRanking,
+            growthStage: growthStage || existingCompany.growthStage,
+            marketTrends: marketTrends || existingCompany.marketTrends,
+            recentNews: recentNews || existingCompany.recentNews,
+            pressReleases: pressReleases || existingCompany.pressReleases,
+            mediaMentions: mediaMentions || existingCompany.mediaMentions,
+            awards: awards || existingCompany.awards,
+            speakingEngagements: speakingEngagements || existingCompany.speakingEngagements,
+            technologyStack: technologyStack || existingCompany.technologyStack,
+            patents: patents || existingCompany.patents,
+            rdInvestment: rdInvestment || existingCompany.rdInvestment,
+            innovationAreas: innovationAreas || existingCompany.innovationAreas,
+            techPartnerships: techPartnerships || existingCompany.techPartnerships,
+            esgScore: esgScore || existingCompany.esgScore,
+            sustainabilityInitiatives: sustainabilityInitiatives || existingCompany.sustainabilityInitiatives,
+            corporateValues: corporateValues || existingCompany.corporateValues,
+            diversityInclusion: diversityInclusion || existingCompany.diversityInclusion,
+            socialImpact: socialImpact || existingCompany.socialImpact,
+            officeLocations: officeLocations || existingCompany.officeLocations,
+            remoteWorkPolicy: remoteWorkPolicy || existingCompany.remoteWorkPolicy,
+            workCulture: workCulture || existingCompany.workCulture,
+            benefits: benefits || existingCompany.benefits,
+            hiringStatus: hiringStatus || existingCompany.hiringStatus,
+            swotAnalysis: swotAnalysis || existingCompany.swotAnalysis,
+            riskFactors: riskFactors || existingCompany.riskFactors,
+            growthStrategy: growthStrategy || existingCompany.growthStrategy,
+            investmentThesis: investmentThesis || existingCompany.investmentThesis,
+            dueDiligenceNotes: dueDiligenceNotes || existingCompany.dueDiligenceNotes,
+          },
+        });
+
+        return NextResponse.json(
+          {
+            message: `Company "${name}" updated successfully with additional information`,
+            company: updatedCompany,
+          },
+          { status: 200 }
+        );
+      }
     }
 
     // Create new company

@@ -157,6 +157,7 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
   const [filterType, setFilterType] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [createSuccess, setCreateSuccess] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [newCompany, setNewCompany] = useState({
     name: "",
@@ -329,6 +330,7 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
   const createCompany = async () => {
     setIsCreating(true);
     setCreateError("");
+    setCreateSuccess("");
     
     try {
       // Only send the fields that the API can handle
@@ -423,6 +425,8 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        setCreateSuccess(result.message || "Company created successfully!");
         setIsCreateDialogOpen(false);
         setNewCompany({
           name: "",
@@ -726,12 +730,18 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
                 <p className="text-sm text-red-600">{createError}</p>
               </div>
             )}
+            {createSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                <p className="text-sm text-green-600">{createSuccess}</p>
+              </div>
+            )}
             <div className="flex justify-end space-x-2 pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={() => {
                   setIsCreateDialogOpen(false);
                   setCreateError("");
+                  setCreateSuccess("");
                 }}
                 disabled={isCreating}
               >
