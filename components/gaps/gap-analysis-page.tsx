@@ -75,6 +75,8 @@ export default function GapAnalysisPage({ reports, contentItems, userId }: GapAn
   const [analysisProgress, setAnalysisProgress] = useState(0)
 
   const exportReport = (report: GapAnalysisReport) => {
+    if (typeof window === 'undefined') return
+    
     const reportData = {
       title: report.title,
       description: report.description,
@@ -142,7 +144,9 @@ export default function GapAnalysisPage({ reports, contentItems, userId }: GapAn
                   setAnalysisProgress(100)
                   // Refresh the page to show new results
                   setTimeout(() => {
-                    window.location.reload()
+                    if (typeof window !== 'undefined') {
+                      window.location.reload()
+                    }
                   }, 1000)
                   return
                 }

@@ -87,7 +87,7 @@ const itemVariants = {
 
 export default function ContentDetailPage({ contentItem }: ContentDetailPageProps) {
   const downloadTranscription = () => {
-    if (!contentItem.transcription) return
+    if (!contentItem.transcription || typeof window === 'undefined') return
 
     const transcriptionText = `Transcription: ${contentItem.title}
 Generated: ${format(new Date(), 'PPP')}

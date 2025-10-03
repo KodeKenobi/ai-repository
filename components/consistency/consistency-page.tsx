@@ -68,6 +68,8 @@ export default function ConsistencyPage({ reports, contentItems, userId }: Consi
   const [analysisProgress, setAnalysisProgress] = useState(0)
 
   const exportReport = (report: ConsistencyReport) => {
+    if (typeof window === 'undefined') return
+    
     const reportData = {
       title: report.title,
       description: report.description,
@@ -133,7 +135,9 @@ export default function ConsistencyPage({ reports, contentItems, userId }: Consi
                   setAnalysisProgress(100)
                   // Refresh the page to show new results
                   setTimeout(() => {
-                    window.location.reload()
+                    if (typeof window !== 'undefined') {
+                      window.location.reload()
+                    }
                   }, 1000)
                   return
                 }

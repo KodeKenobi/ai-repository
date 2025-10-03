@@ -18,7 +18,7 @@ export default function Providers({ children }: ProvidersProps) {
 
   // Always render SessionProvider, but conditionally render ThemeProvider
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
       {mounted ? (
         <ThemeProvider 
           attribute="class" 
