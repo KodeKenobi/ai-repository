@@ -8,18 +8,47 @@ export default function GlobalError({
   return (
     <html>
       <body>
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-gray-900 mb-4">500</h1>
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+        <div style={{
+          minHeight: '100vh',
+          backgroundColor: '#f9fafb',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: '3.75rem',
+              fontWeight: 'bold',
+              color: '#111827',
+              marginBottom: '1rem'
+            }}>500</h1>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '1rem'
+            }}>
               Something went wrong!
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p style={{
+              color: '#6b7280',
+              marginBottom: '2rem'
+            }}>
               An unexpected error occurred. Please try again.
             </p>
             <button
               onClick={reset}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}
             >
               Try again
             </button>
