@@ -157,8 +157,9 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
   const [filterType, setFilterType] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createError, setCreateError] = useState("");
-  const [createSuccess, setCreateSuccess] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [newCompany, setNewCompany] = useState({
     name: "",
     tradingName: "",
@@ -330,7 +331,6 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
   const createCompany = async () => {
     setIsCreating(true);
     setCreateError("");
-    setCreateSuccess("");
     
     try {
       // Only send the fields that the API can handle
@@ -426,8 +426,9 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
 
       if (response.ok) {
         const result = await response.json();
-        setCreateSuccess(result.message || "Company created successfully!");
+        setSuccessMessage(result.message || "Company created successfully!");
         setIsCreateDialogOpen(false);
+        setShowSuccessModal(true);
         setNewCompany({
           name: "",
           tradingName: "",
@@ -730,18 +731,12 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
                 <p className="text-sm text-red-600">{createError}</p>
               </div>
             )}
-            {createSuccess && (
-              <div className="bg-green-50 border border-green-200 rounded-md p-3">
-                <p className="text-sm text-green-600">{createSuccess}</p>
-              </div>
-            )}
             <div className="flex justify-end space-x-2 pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={() => {
                   setIsCreateDialogOpen(false);
                   setCreateError("");
-                  setCreateSuccess("");
                 }}
                 disabled={isCreating}
               >
@@ -749,6 +744,30 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
               </Button>
               <Button onClick={createCompany} disabled={isCreating}>
                 {isCreating ? "Creating..." : "Create Company"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Success Modal */}
+        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span>Success!</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600">{successMessage}</p>
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={() => setShowSuccessModal(false)}>
+                Continue
               </Button>
             </div>
           </DialogContent>
