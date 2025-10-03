@@ -156,6 +156,8 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [filterType, setFilterType] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const [newCompany, setNewCompany] = useState({
     name: "",
     tradingName: "",
@@ -325,6 +327,9 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
   };
 
   const createCompany = async () => {
+    setIsCreating(true);
+    setCreateError("");
+    
     try {
       // Only send the fields that the API can handle
       const companyData = {
@@ -504,9 +509,15 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
         if (searchQuery) {
           searchCompanies(searchQuery);
         }
+      } else {
+        const errorData = await response.json();
+        setCreateError(errorData.error || "Failed to create company");
       }
     } catch (error) {
       console.error("Create company error:", error);
+      setCreateError("Something went wrong. Please try again.");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -710,14 +721,25 @@ export default function CompanySearch({ userId }: CompanySearchProps) {
                 </Select>
               </div>
             </div>
+            {createError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600">{createError}</p>
+              </div>
+            )}
             <div className="flex justify-end space-x-2 pt-4 border-t">
               <Button
                 variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
+                onClick={() => {
+                  setIsCreateDialogOpen(false);
+                  setCreateError("");
+                }}
+                disabled={isCreating}
               >
                 Cancel
               </Button>
-              <Button onClick={createCompany}>Create Company</Button>
+              <Button onClick={createCompany} disabled={isCreating}>
+                {isCreating ? "Creating..." : "Create Company"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
     if (existingCompany) {
       console.log(`Company "${name}" already exists`);
       return NextResponse.json(
-        { error: "Company already exists" },
+        { error: `A company named "${name}" already exists. Please choose a different name or search for the existing company.` },
         { status: 400 }
       );
     }
