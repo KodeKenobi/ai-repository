@@ -5,6 +5,23 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      console.error('Missing NEXT_PUBLIC_SUPABASE_URL')
+      return NextResponse.json(
+        { error: 'Server configuration error: Missing Supabase URL' },
+        { status: 500 }
+      )
+    }
+    
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing SUPABASE_SERVICE_ROLE_KEY')
+      return NextResponse.json(
+        { error: 'Server configuration error: Missing Supabase service role key' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { email, password, firstName, lastName, companyName } = body
 
@@ -25,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (checkError && checkError.code !== 'PGRST116') {
       console.error('Error checking existing user:', checkError)
       return NextResponse.json(
-        { error: 'Internal server error' },
+        { error: 'Database error: ' + checkError.message },
         { status: 500 }
       )
     }
@@ -56,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (createError) {
       console.error('Error creating user:', createError)
       return NextResponse.json(
-        { error: 'Internal server error' },
+        { error: 'Database error: ' + createError.message },
         { status: 500 }
       )
     }
