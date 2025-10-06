@@ -28,6 +28,24 @@ export function getSupabaseAdmin() {
   });
 }
 
-// Direct exports for backward compatibility
-export const supabase = getSupabaseClient();
-export const supabaseAdmin = getSupabaseAdmin();
+// Lazy initialization to avoid build-time errors
+let _supabase: any = null;
+let _supabaseAdmin: any = null;
+
+export const supabase = new Proxy({}, {
+  get(target, prop) {
+    if (!_supabase) {
+      _supabase = getSupabaseClient();
+    }
+    return _supabase[prop];
+  }
+});
+
+export const supabaseAdmin = new Proxy({}, {
+  get(target, prop) {
+    if (!_supabaseAdmin) {
+      _supabaseAdmin = getSupabaseAdmin();
+    }
+    return _supabaseAdmin[prop];
+  }
+});
