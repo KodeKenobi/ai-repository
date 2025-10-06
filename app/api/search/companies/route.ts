@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -63,55 +63,66 @@ export async function GET(request: NextRequest) {
     }
 
     // Search companies by name (case-insensitive)
-    const companies = await prisma.company.findMany({
-      where: {
-        name: {
-          contains: query,
-          mode: "insensitive",
-        },
-        ...(type && { type: type as any }),
-      },
-      include: {
-        contentItems: {
-          where: { userId: session.user.id },
-          include: {
-            transcription: true,
-            insights: true,
-          },
-        },
-        insights: {
-          where: { userId: session.user.id },
-        },
-      },
-      orderBy: { name: "asc" },
-    });
+    let companiesQuery = supabaseAdmin
+      .from('companies')
+      .select(`
+        *,
+        content_items!inner(
+          *,
+          transcriptions(*),
+          business_insights(*)
+        ),
+        business_insights!inner(*)
+      `)
+      .ilike('name', `%${query}%`)
+      .order('name', { ascending: true });
+
+    if (type) {
+      companiesQuery = companiesQuery.eq('type', type);
+    }
+
+    const { data: companies, error: companiesError } = await companiesQuery;
+
+    if (companiesError) {
+      console.error('Error searching companies:', companiesError);
+      return NextResponse.json(
+        { error: "Failed to search companies" },
+        { status: 500 }
+      );
+    }
+
+    // Filter content items and insights by user
+    const filteredCompanies = companies?.map(company => ({
+      ...company,
+      content_items: company.content_items?.filter((item: any) => item.user_id === session.user.id) || [],
+      business_insights: company.business_insights?.filter((insight: any) => insight.user_id === session.user.id) || []
+    })) || [];
 
     // Also search for content items that might contain the company name
-    const relatedContent = await prisma.contentItem.findMany({
-      where: {
-        userId: session.user.id,
-        OR: [
-          { title: { contains: query, mode: "insensitive" } },
-          { description: { contains: query, mode: "insensitive" } },
-          {
-            transcription: {
-              content: { contains: query, mode: "insensitive" },
-            },
-          },
-        ],
-      },
-      include: {
-        transcription: true,
-        insights: true,
-        company: true,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    });
+    const { data: relatedContent, error: contentError } = await supabaseAdmin
+      .from('content_items')
+      .select(`
+        *,
+        transcriptions(*),
+        business_insights(*),
+        companies(*)
+      `)
+      .eq('user_id', session.user.id)
+      .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (contentError) {
+      console.error('Error searching content:', contentError);
+      return NextResponse.json(
+        { error: "Failed to search content" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
-      companies,
-      relatedContent,
+      companies: filteredCompanies,
+      relatedContent: relatedContent || [],
       query,
     });
   } catch (error) {
@@ -225,9 +236,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if company already exists
-    const existingCompany = await prisma.company.findUnique({
-      where: { name },
-    });
+    const { data: existingCompany, error: checkError } = await supabaseAdmin
+      .from('companies')
+      .select('*')
+      .eq('name', name)
+      .single();
 
     if (existingCompany) {
       console.log(`Company "${name}" already exists`);
@@ -243,9 +256,9 @@ export async function POST(request: NextRequest) {
       } else {
         // Update the existing company with new data
         console.log(`Updating incomplete company "${name}" with new data`);
-        const updatedCompany = await prisma.company.update({
-          where: { name },
-          data: {
+        const { data: updatedCompany, error: updateError } = await supabaseAdmin
+          .from('companies')
+          .update({
             description: description || existingCompany.description,
             industry: industry || existingCompany.industry,
             website: website || existingCompany.website,
