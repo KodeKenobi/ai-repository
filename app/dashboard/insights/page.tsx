@@ -1,31 +1,18 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import InsightsPage from "@/components/insights/insights-page";
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import InsightsPage from '@/components/insights/insights-page'
-
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default async function DashboardInsightsPage() {
-  const session = await getServerSession(authOptions)
-  
+  const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
-  const insights = await prisma.businessInsight.findMany({
-    where: { userId: session.user.id },
-    include: {
-      contentItem: {
-        select: {
-          id: true,
-          title: true,
-          contentType: true,
-          createdAt: true
-        }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  })
+  // TODO: Implement with Supabase
+  const insights = [];
 
-  return <InsightsPage insights={insights} />
+  return <InsightsPage insights={insights} />;
 }

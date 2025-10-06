@@ -1,40 +1,31 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { notFound } from "next/navigation";
+import ContentDetailPage from "@/components/content/content-detail-page";
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { notFound } from 'next/navigation'
-import ContentDetailPage from '@/components/content/content-detail-page'
-
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 interface ContentDetailPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
-export default async function DashboardContentDetailPage({ params }: ContentDetailPageProps) {
-  const session = await getServerSession(authOptions)
-  
+export default async function DashboardContentDetailPage({
+  params,
+}: ContentDetailPageProps) {
+  const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
-  const contentItem = await prisma.contentItem.findFirst({
-    where: { 
-      id: params.id,
-      userId: session.user.id
-    },
-    include: {
-      transcription: true,
-      insights: {
-        orderBy: { createdAt: 'desc' }
-      }
-    }
-  })
+  // TODO: Implement with Supabase
+  const contentItem = null;
 
   if (!contentItem) {
-    notFound()
+    notFound();
   }
 
-  return <ContentDetailPage contentItem={contentItem} />
+  return <ContentDetailPage contentItem={contentItem} />;
 }
