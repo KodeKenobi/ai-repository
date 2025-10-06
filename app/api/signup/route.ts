@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,9 +16,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
+    const { data: existingUser, error: checkError } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single()
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking existing user:', checkError)
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      )
+    }
 
     if (existingUser) {
       return NextResponse.json(
@@ -31,15 +41,25 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
+    const { data: user, error: createError } = await supabaseAdmin
+      .from('users')
+      .insert({
         email,
         password: hashedPassword,
-        firstName: firstName || null,
-        lastName: lastName || null,
-        companyName: companyName || null,
-      }
-    })
+        first_name: firstName || null,
+        last_name: lastName || null,
+        company_name: companyName || null,
+      })
+      .select('id, email, first_name, last_name, company_name')
+      .single()
+
+    if (createError) {
+      console.error('Error creating user:', createError)
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(
       { 
@@ -47,9 +67,9 @@ export async function POST(request: NextRequest) {
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          companyName: user.companyName,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          companyName: user.company_name,
         }
       },
       { status: 201 }
