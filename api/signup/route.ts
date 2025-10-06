@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Signup endpoint called");
+    
     // Check environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       console.error("Missing NEXT_PUBLIC_SUPABASE_URL");
@@ -24,6 +26,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log("Environment variables check passed");
+
     const body = await request.json();
     const { email, password, firstName, lastName, companyName } = body;
 
@@ -34,12 +38,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log("Request body parsed successfully");
+
     // Check if user already exists
+    console.log("Attempting to check existing user");
     const { data: existingUser, error: checkError } = await supabaseAdmin
       .from("users")
       .select("id")
       .eq("email", email)
       .single();
+    
+    console.log("User check completed", { existingUser, checkError });
 
     if (checkError && checkError.code !== "PGRST116") {
       console.error("Error checking existing user:", checkError);
