@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("Signup endpoint called");
-    
+
     // Check environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       console.error("Missing NEXT_PUBLIC_SUPABASE_URL");
@@ -42,12 +42,13 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists
     console.log("Attempting to check existing user");
+    const supabaseAdmin = getSupabaseAdmin();
     const { data: existingUser, error: checkError } = await supabaseAdmin
       .from("users")
       .select("id")
       .eq("email", email)
       .single();
-    
+
     console.log("User check completed", { existingUser, checkError });
 
     if (checkError && checkError.code !== "PGRST116") {
@@ -105,10 +106,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { 
+      {
         error: "Internal server error",
         details: error.message,
-        stack: error.stack
+        stack: error.stack,
       },
       { status: 500 }
     );
