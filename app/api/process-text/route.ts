@@ -14,21 +14,21 @@ export async function POST(request: NextRequest) {
 
     // Create content item for text
     const { data: contentItem, error: contentError } = await supabaseAdmin
-      .from('content_items')
+      .from("content_items")
       .insert({
         title,
         description: `Direct text input - ${text.length} characters`,
-        content_type: 'TEXT',
-        source: 'DIRECT_INPUT',
-        status: 'COMPLETED', // Text doesn't need transcription
+        content_type: "TEXT",
+        source: "DIRECT_INPUT",
+        status: "COMPLETED", // Text doesn't need transcription
         user_id: userId,
         processed_at: new Date().toISOString(),
       })
-      .select('id')
+      .select("id")
       .single();
 
     if (contentError) {
-      console.error('Error creating content item:', contentError);
+      console.error("Error creating content item:", contentError);
       return NextResponse.json(
         { error: "Failed to create content item" },
         { status: 500 }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Create "transcription" record with the direct text
     const { error: transcriptionError } = await supabaseAdmin
-      .from('transcriptions')
+      .from("transcriptions")
       .insert({
         content: text,
         language: "en",
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (transcriptionError) {
-      console.error('Error creating transcription:', transcriptionError);
+      console.error("Error creating transcription:", transcriptionError);
       return NextResponse.json(
         { error: "Failed to create transcription" },
         { status: 500 }
