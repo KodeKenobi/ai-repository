@@ -1,7 +1,6 @@
 
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
 import InsightsPage from '@/components/insights/insights-page'
 
 export const dynamic = 'force-dynamic'

@@ -1,7 +1,6 @@
 
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import ContentDetailPage from '@/components/content/content-detail-page'
 
