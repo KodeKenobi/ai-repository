@@ -10,7 +10,9 @@ const testSignupDetailed = async () => {
 
   try {
     console.log("Testing signup endpoint with detailed logging...");
-    console.log("URL: https://ai-data-repository-qckb93pc4-kodekenobis-projects.vercel.app/api/signup");
+    console.log(
+      "URL: https://ai-data-repository-qckb93pc4-kodekenobis-projects.vercel.app/api/signup"
+    );
     console.log("Data:", testData);
 
     const response = await fetch(
@@ -25,8 +27,11 @@ const testSignupDetailed = async () => {
     );
 
     console.log("Response status:", response.status);
-    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-    
+    console.log(
+      "Response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
     const responseText = await response.text();
     console.log("Response body:", responseText);
 
@@ -34,7 +39,7 @@ const testSignupDetailed = async () => {
       console.log("✅ SUCCESS! Signup endpoint is working!");
     } else {
       console.log("❌ Error response received");
-      
+
       // Try to parse as JSON for better error details
       try {
         const errorData = JSON.parse(responseText);
