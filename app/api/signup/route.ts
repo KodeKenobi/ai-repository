@@ -1,31 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("Signup endpoint called");
 
-    // Check environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      console.error("Missing NEXT_PUBLIC_SUPABASE_URL");
-      return NextResponse.json(
-        { error: "Server configuration error: Missing Supabase URL" },
-        { status: 500 }
-      );
-    }
+    // Hardcoded Supabase credentials
+    const supabaseUrl = "https://xazhkbgjanwakrmvpqie.supabase.co";
+    const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhemhrYmdqYW53YWtybXZwcWllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE2NDc3NSwiZXhwIjoyMDc0NzQwNzc1fQ.6-hQThD69Zj5pFegUvKF-uBXFbas-aBRJsqhSgV2uSU";
 
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error("Missing SUPABASE_SERVICE_ROLE_KEY");
-      return NextResponse.json(
-        {
-          error:
-            "Server configuration error: Missing Supabase service role key",
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log("Environment variables check passed");
+    console.log("Using hardcoded Supabase credentials");
 
     const body = await request.json();
     const { email, password, firstName, lastName, companyName } = body;
@@ -41,7 +25,12 @@ export async function POST(request: NextRequest) {
 
     // Create user using Supabase Auth
     console.log("Attempting to create user with Supabase Auth");
-    const supabaseAdmin = getSupabaseAdmin();
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
     const { data: authData, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
