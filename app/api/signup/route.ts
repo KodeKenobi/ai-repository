@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("Signup endpoint called");
-
-    // Import Supabase only when needed
-    const { createClient } = await import("@supabase/supabase-js");
 
     // Hardcoded Supabase credentials
     const supabaseUrl = "https://xazhkbgjanwakrmvpqie.supabase.co";
