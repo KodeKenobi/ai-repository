@@ -1,7 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { supabaseAdmin } from "@/lib/supabase";
-import bcrypt from "bcryptjs";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -16,34 +15,36 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        const { data: user, error } = await supabaseAdmin
-          .from("users")
-          .select("*")
-          .eq("email", credentials.email)
-          .single();
+        try {
+          const supabaseAdmin = getSupabaseAdmin();
 
-        if (error || !user) {
+          // Use Supabase Auth to sign in the user
+          const { data: authData, error: authError } =
+            await supabaseAdmin.auth.signInWithPassword({
+              email: credentials.email,
+              password: credentials.password,
+            });
+
+          if (authError || !authData.user) {
+            return null;
+          }
+
+          // Get user metadata
+          const { first_name, last_name, company_name } =
+            authData.user.user_metadata || {};
+
+          return {
+            id: authData.user.id,
+            email: authData.user.email,
+            name: `${first_name || ""} ${last_name || ""}`.trim() || null,
+            firstName: first_name,
+            lastName: last_name,
+            companyName: company_name,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name:
-            `${user.first_name || ""} ${user.last_name || ""}`.trim() || null,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          companyName: user.company_name,
-        };
       },
     }),
   ],
