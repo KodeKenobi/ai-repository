@@ -1,6 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -16,8 +16,6 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          const supabaseAdmin = getSupabaseAdmin();
-
           // Use Supabase Auth to sign in the user
           const { data: authData, error: authError } =
             await supabaseAdmin.auth.signInWithPassword({

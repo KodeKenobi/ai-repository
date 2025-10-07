@@ -21,15 +21,22 @@ export async function POST(request: NextRequest) {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     console.log("Environment check:");
-    console.log("- NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "✅ Present" : "❌ Missing");
-    console.log("- SUPABASE_SERVICE_ROLE_KEY:", supabaseServiceKey ? "✅ Present" : "❌ Missing");
+    console.log(
+      "- NEXT_PUBLIC_SUPABASE_URL:",
+      supabaseUrl ? "✅ Present" : "❌ Missing"
+    );
+    console.log(
+      "- SUPABASE_SERVICE_ROLE_KEY:",
+      supabaseServiceKey ? "✅ Present" : "❌ Missing"
+    );
 
     if (!supabaseUrl || !supabaseServiceKey) {
       console.log("❌ Missing required environment variables");
       return NextResponse.json(
-        { 
+        {
           error: "Server configuration error",
-          details: "Missing Supabase environment variables. Please check Vercel-Supabase integration."
+          details:
+            "Missing Supabase environment variables. Please check Vercel-Supabase integration.",
         },
         { status: 500 }
       );
