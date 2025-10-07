@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Signup endpoint called - v2");
+    console.log("Signup endpoint called");
 
     // Check environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -40,65 +39,40 @@ export async function POST(request: NextRequest) {
 
     console.log("Request body parsed successfully");
 
-    // Check if user already exists
-    console.log("Attempting to check existing user");
+    // Create user using Supabase Auth
+    console.log("Attempting to create user with Supabase Auth");
     const supabaseAdmin = getSupabaseAdmin();
-    const { data: existingUser, error: checkError } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", email)
-      .single();
 
-    console.log("User check completed", { existingUser, checkError });
-
-    if (checkError && checkError.code !== "PGRST116") {
-      console.error("Error checking existing user:", checkError);
-      return NextResponse.json(
-        { error: "Database error: " + checkError.message },
-        { status: 500 }
-      );
-    }
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      );
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Create user
-    const { data: user, error: createError } = await supabaseAdmin
-      .from("users")
-      .insert({
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.admin.createUser({
         email,
-        password: hashedPassword,
-        first_name: firstName || null,
-        last_name: lastName || null,
-        company_name: companyName || null,
-      })
-      .select("id, email, first_name, last_name, company_name")
-      .single();
+        password,
+        user_metadata: {
+          first_name: firstName || null,
+          last_name: lastName || null,
+          company_name: companyName || null,
+        },
+      });
 
-    if (createError) {
-      console.error("Error creating user:", createError);
+    if (authError) {
+      console.error("Error creating user:", authError);
       return NextResponse.json(
-        { error: "Database error: " + createError.message },
+        { error: "Authentication error: " + authError.message },
         { status: 500 }
       );
     }
+
+    console.log("User created successfully with Supabase Auth");
 
     return NextResponse.json(
       {
         message: "User created successfully",
         user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          companyName: user.company_name,
+          id: authData.user.id,
+          email: authData.user.email,
+          firstName: authData.user.user_metadata.first_name,
+          lastName: authData.user.user_metadata.last_name,
+          companyName: authData.user.user_metadata.company_name,
         },
       },
       { status: 201 }
