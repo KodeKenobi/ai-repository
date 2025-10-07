@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Signup endpoint called");
-
-    // Hardcoded Supabase credentials
-    const supabaseUrl = "https://xazhkbgjanwakrmvpqie.supabase.co";
-    const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhemhrYmdqYW53YWtybXZwcWllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE2NDc3NSwiZXhwIjoyMDc0NzQwNzc1fQ.6-hQThD69Zj5pFegUvKF-uBXFbas-aBRJsqhSgV2uSU";
-
-    console.log("Using hardcoded Supabase credentials");
+    console.log("Signup endpoint called - testing without Supabase import");
 
     const body = await request.json();
     const { email, password, firstName, lastName, companyName } = body;
@@ -23,15 +16,25 @@ export async function POST(request: NextRequest) {
 
     console.log("Request body parsed successfully");
 
-    // Create user using Supabase Auth
-    console.log("Attempting to create user with Supabase Auth");
+    // Test if we can import Supabase dynamically
+    console.log("Attempting dynamic import of Supabase...");
+    const { createClient } = await import("@supabase/supabase-js");
+    console.log("✅ Supabase imported successfully");
+
+    // Hardcoded Supabase credentials
+    const supabaseUrl = "https://xazhkbgjanwakrmvpqie.supabase.co";
+    const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhemhrYmdqYW53YWtybXZwcWllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE2NDc3NSwiZXhwIjoyMDc0NzQwNzc1fQ.6-hQThD69Zj5pFegUvKF-uBXFbas-aBRJsqhSgV2uSU";
+
+    console.log("Creating Supabase client...");
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
     });
+    console.log("✅ Supabase client created");
 
+    console.log("Attempting to create user...");
     const { data: authData, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
         email,
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("User created successfully with Supabase Auth");
+    console.log("✅ User created successfully");
 
     return NextResponse.json(
       {
