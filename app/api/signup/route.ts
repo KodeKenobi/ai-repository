@@ -66,13 +66,17 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Signup error:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
     return NextResponse.json(
       {
         error: "Internal server error",
         details: error.message,
         stack: error.stack,
+        type: typeof error,
+        name: error.name,
       },
       { status: 500 }
     );
