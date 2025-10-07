@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Signup endpoint called - testing without Supabase import");
+    console.log("Signup endpoint called - using Vercel-Supabase integration");
 
     const body = await request.json();
     const { email, password, firstName, lastName, companyName } = body;
@@ -16,17 +16,32 @@ export async function POST(request: NextRequest) {
 
     console.log("Request body parsed successfully");
 
+    // Check if we have the proper Vercel-Supabase environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    console.log("Environment check:");
+    console.log("- NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "✅ Present" : "❌ Missing");
+    console.log("- SUPABASE_SERVICE_ROLE_KEY:", supabaseServiceKey ? "✅ Present" : "❌ Missing");
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.log("❌ Missing required environment variables");
+      return NextResponse.json(
+        { 
+          error: "Server configuration error",
+          details: "Missing Supabase environment variables. Please check Vercel-Supabase integration."
+        },
+        { status: 500 }
+      );
+    }
+
     // Test if we can import Supabase dynamically
     console.log("Attempting dynamic import of Supabase...");
     const { createClient } = await import("@supabase/supabase-js");
     console.log("✅ Supabase imported successfully");
 
-    // Hardcoded Supabase credentials
-    const supabaseUrl = "https://xazhkbgjanwakrmvpqie.supabase.co";
-    const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhemhrYmdqYW53YWtybXZwcWllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE2NDc3NSwiZXhwIjoyMDc0NzQwNzc1fQ.6-hQThD69Zj5pFegUvKF-uBXFbas-aBRJsqhSgV2uSU";
-
-    console.log("Creating Supabase client...");
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+    console.log("Creating Supabase client with environment variables...");
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
